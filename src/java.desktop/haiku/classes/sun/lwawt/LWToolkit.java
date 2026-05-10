@@ -40,6 +40,7 @@ import sun.awt.util.ThreadGroupUtils;
 
 import static sun.lwawt.LWWindowPeer.PeerType;
 
+@SuppressWarnings("removal")
 public abstract class LWToolkit extends SunToolkit implements Runnable {
 
     private final static int STATE_NONE = 0;

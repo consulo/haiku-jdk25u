@@ -35,10 +35,6 @@ import sun.java2d.*;
  */
 public class HaikuGraphicsEnvironment extends SunGraphicsEnvironment {
 
-    static {
-        SurfaceManagerFactory.setInstance(new HaikuSurfaceManagerFactory());
-    }
-
     private final Map<Integer, HaikuGraphicsDevice> devices = new HashMap<>();
 
     private static native int[] getDisplayIDs();

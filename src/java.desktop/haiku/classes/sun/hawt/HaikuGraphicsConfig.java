@@ -33,7 +33,7 @@ import sun.java2d.SurfaceData;
 import sun.lwawt.*;
 
 public class HaikuGraphicsConfig extends GraphicsConfiguration
-        implements LWGraphicsConfig {
+        implements LWGraphicsConfig, SurfaceManager.Factory {
     private final HaikuGraphicsDevice device;
     private ColorModel colorModel;
 
@@ -168,5 +168,11 @@ public class HaikuGraphicsConfig extends GraphicsConfiguration
         WritableRaster wr = model.createCompatibleWritableRaster(width, height);
         return new OffScreenImage(target, model, wr,
                                   model.isAlphaPremultiplied());
+    }
+
+    @Override
+    public VolatileSurfaceManager createVolatileManager(SunVolatileImage image,
+                                                        Object context) {
+        return new HaikuVolatileSurfaceManager(image, context);
     }
 }
