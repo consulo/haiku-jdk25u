@@ -31,6 +31,8 @@
 #include "code/vtableStubs.hpp"
 #include "interpreter/interpreter.hpp"
 #include "memory/allocation.inline.hpp"
+#include "os_haiku.hpp"
+#include "os_posix.hpp"
 #include "os_share_haiku.hpp"
 #include "prims/jniFastGetField.hpp"
 #include "prims/jvm_misc.hpp"

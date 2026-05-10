@@ -25,6 +25,8 @@
 #ifndef OS_HAIKU_OS_HAIKU_HPP
 #define OS_HAIKU_OS_HAIKU_HPP
 
+#include "runtime/os.hpp"
+
 #include <SupportDefs.h>
 #include <inttypes.h>
 
