@@ -93,6 +93,10 @@ final class ProcessImpl extends Process {
     private static LaunchMechanism launchMechanism() {
         String s = System.getProperty("jdk.lang.Process.launchMechanism");
         if (s == null) {
+            // Haiku has no posix_spawn; fall back to FORK
+            if (OperatingSystem.isHaiku()) {
+                return LaunchMechanism.FORK;
+            }
             return LaunchMechanism.POSIX_SPAWN;
         }
 
@@ -114,6 +118,11 @@ final class ProcessImpl extends Process {
                     }
                     return lm;
                 }
+                case HAIKU:
+                    if (lm != LaunchMechanism.POSIX_SPAWN && lm != LaunchMechanism.VFORK) {
+                        return lm; // POSIX_SPAWN and VFORK are not supported on Haiku
+                    }
+                    break;
                 case AIX:
                 case MACOS:
                     if (lm != LaunchMechanism.VFORK) {
@@ -327,6 +336,7 @@ final class ProcessImpl extends Process {
         switch (OperatingSystem.current()) {
             case LINUX:
             case MACOS:
+            case HAIKU:
                 stdin = (fds[0] == -1) ?
                         ProcessBuilder.NullOutputStream.INSTANCE :
                         new ProcessPipeOutputStream(fds[0]);
@@ -460,6 +470,7 @@ final class ProcessImpl extends Process {
             case LINUX:
             case MACOS:
             case AIX:
+            case HAIKU:
                 // There is a risk that pid will be recycled, causing us to
                 // kill the wrong process!  So we only terminate processes
                 // that appear to still be running.  Even with this check,

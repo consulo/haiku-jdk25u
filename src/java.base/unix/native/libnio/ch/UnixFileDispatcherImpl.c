@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 
-#if defined(_ALLBSD_SOURCE)
+#if defined(_ALLBSD_SOURCE) || defined(__HAIKU__)
 #define fdatasync fsync
 #endif
 

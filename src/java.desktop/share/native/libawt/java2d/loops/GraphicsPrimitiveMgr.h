@@ -31,6 +31,9 @@ extern "C" {
 #endif
 
 #include <stddef.h>
+#ifdef __HAIKU__
+#include <stdint.h>
+#endif
 #include "jni.h"
 
 #include "java_awt_AlphaComposite.h"

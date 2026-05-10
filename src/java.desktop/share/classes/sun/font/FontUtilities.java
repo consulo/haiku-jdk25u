@@ -44,6 +44,8 @@ public final class FontUtilities {
     public static boolean isMacOSX;
     public static boolean isMacOSX14;
 
+    public static boolean isHaiku;
+
     public static boolean useJDKScaler;
 
     public static boolean isWindows;
@@ -61,6 +63,8 @@ public final class FontUtilities {
     private static void initStatic() {
 
         isLinux = OSInfo.getOSType() == OSInfo.OSType.LINUX;
+
+        isHaiku = OSInfo.getOSType() == OSInfo.OSType.HAIKU;
 
         isMacOSX = OSInfo.getOSType() == OSInfo.OSType.MACOSX;
         if (isMacOSX) {

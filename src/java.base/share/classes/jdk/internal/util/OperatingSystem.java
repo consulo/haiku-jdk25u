@@ -81,6 +81,10 @@ public enum OperatingSystem {
      * The AIX Operating system.
      */
     AIX,
+    /**
+     * The Haiku Operating system.
+     */
+    HAIKU,
     ;
 
     // The current OperatingSystem
@@ -116,6 +120,14 @@ public enum OperatingSystem {
     @ForceInline
     public static boolean isAix() {
         return PlatformProps.TARGET_OS_IS_AIX;
+    }
+
+    /**
+     * {@return {@code true} if built for the Haiku operating system}
+     */
+    @ForceInline
+    public static boolean isHaiku() {
+        return PlatformProps.TARGET_OS_IS_HAIKU;
     }
 
     /**

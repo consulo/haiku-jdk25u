@@ -27,6 +27,9 @@ public class OSUtils {
     public static final boolean IS_CYGWIN =
             IS_WINDOWS && System.getenv("PWD") != null && System.getenv("PWD").startsWith("/");
 
+    public static final boolean IS_HAIKU =
+            System.getProperty("os.name").toLowerCase().equals("haiku");
+
     @Deprecated
     public static final boolean IS_MINGW = IS_WINDOWS
             && System.getenv("MSYSTEM") != null

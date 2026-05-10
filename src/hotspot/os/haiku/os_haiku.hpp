@@ -25,6 +25,13 @@
 #ifndef OS_HAIKU_OS_HAIKU_HPP
 #define OS_HAIKU_OS_HAIKU_HPP
 
+#include <SupportDefs.h>
+
+#define OSTHREADID_FORMAT      "%" B_PRIx32
+#define OSTHREADID_FORMAT2     "%2" B_PRId32
+#define OSTHREADID_FORMAT_HEX  "%" B_PRIx32
+#define OSTHREADID_FORMAT_HEX2 "%2" B_PRIx32
+
 // Haiku_OS defines the interface to the Haiku operating system
 
 // Information about the protection of the page at address '0' on this os.

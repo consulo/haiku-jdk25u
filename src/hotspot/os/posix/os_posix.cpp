@@ -167,7 +167,7 @@ void os::check_core_dump_prerequisites(char* buffer, size_t bufferSize, bool che
 
 bool os::committed_in_range(address start, size_t size, address& committed_start, size_t& committed_size) {
 
-#ifdef _AIX
+#if defined(_AIX) || defined(__HAIKU__)
   committed_start = start;
   committed_size = size;
   return true;
@@ -297,6 +297,7 @@ size_t os::lasterror(char *buf, size_t len) {
 ////////////////////////////////////////////////////////////////////////////////
 // breakpoint support
 
+#ifndef __HAIKU__
 void os::breakpoint() {
   BREAKPOINT;
 }
@@ -310,6 +311,7 @@ bool os::have_special_privileges() {
   static bool privileges = (getuid() != geteuid()) || (getgid() != getegid());
   return privileges;
 }
+#endif // __HAIKU__
 
 void os::wait_for_keypress_at_exit(void) {
   // don't do anything on posix platforms
@@ -364,6 +366,7 @@ int os::create_file_for_heap(const char* dir) {
   return fd;
 }
 
+#ifndef __HAIKU__
 // return current position of file pointer
 jlong os::current_file_offset(int fd) {
   return (jlong)::lseek(fd, (off_t)0, SEEK_CUR);
@@ -392,10 +395,11 @@ bool os::dir_is_empty(const char* path) {
   ::closedir(dir);
   return result;
 }
+#endif // __HAIKU__
 
 static char* reserve_mmapped_memory(size_t bytes, char* requested_addr, MemTag mem_tag) {
   char * addr;
-  int flags = MAP_PRIVATE NOT_AIX( | MAP_NORESERVE ) | MAP_ANONYMOUS;
+  int flags = MAP_PRIVATE NOT_AIX( NOT_HAIKU( | MAP_NORESERVE )) | MAP_ANONYMOUS;
   if (requested_addr != nullptr) {
     assert((uintptr_t)requested_addr % os::vm_page_size() == 0, "Requested address should be aligned to OS page size");
     flags |= MAP_FIXED;

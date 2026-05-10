@@ -59,9 +59,9 @@
 #include <limits.h>
 #include <errno.h>
 
-#if defined(LINUX) || defined(_ALLBSD_SOURCE) || defined(_AIX)
+#if defined(LINUX) || defined(_ALLBSD_SOURCE) || defined(_AIX) || defined(HAIKU)
 #include <signal.h>
-#ifndef __OpenBSD__
+#if !defined(__OpenBSD__) && !defined(HAIKU)
 #include <ucontext.h>
 #endif
 #ifdef __APPLE__
@@ -69,12 +69,12 @@
   #include <mach/mach.h>
 #endif
 #include <sys/time.h>
-#endif // LINUX || _ALLBSD_SOURCE
+#endif // LINUX || _ALLBSD_SOURCE || HAIKU
 
 // checking for nanness
 #if defined(__APPLE__)
 inline int g_isnan(double f) { return isnan(f); }
-#elif defined(LINUX) || defined(_ALLBSD_SOURCE) || defined(_AIX)
+#elif defined(LINUX) || defined(_ALLBSD_SOURCE) || defined(_AIX) || defined(HAIKU)
 inline int g_isnan(float  f) { return isnan(f); }
 inline int g_isnan(double f) { return isnan(f); }
 #else

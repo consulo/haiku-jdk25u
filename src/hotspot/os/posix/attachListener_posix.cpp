@@ -39,7 +39,7 @@
 #include <sys/stat.h>
 
 #if INCLUDE_SERVICES
-#ifndef AIX
+#if !defined(AIX) && !defined(HAIKU)
 
 #ifndef UNIX_PATH_MAX
 #define UNIX_PATH_MAX   sizeof(sockaddr_un::sun_path)
@@ -452,6 +452,6 @@ void AttachListener::pd_detachall() {
   // do nothing for now
 }
 
-#endif // !AIX
+#endif // !AIX && !HAIKU
 
 #endif // INCLUDE_SERVICES

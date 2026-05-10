@@ -41,12 +41,14 @@
 #include <sys/proc_info.h>
 #include <libproc.h>
 #endif
+#elif defined(__HAIKU__)
+#include <kernel/OS.h>
 #elif !defined(_AIX)
 #include <sys/swap.h>
 #endif
 #include <sys/resource.h>
 #include <sys/times.h>
-#ifndef _ALLBSD_SOURCE
+#if !defined(_ALLBSD_SOURCE) && !defined(__HAIKU__)
 #include <sys/sysinfo.h>
 #endif
 #include <ctype.h>
@@ -63,7 +65,7 @@
 
 static jlong page_size = 0;
 
-#if defined(_ALLBSD_SOURCE) || defined(_AIX)
+#if defined(_ALLBSD_SOURCE) || defined(_AIX) || defined(__HAIKU__)
 #define MB      (1024UL * 1024UL)
 #else
 

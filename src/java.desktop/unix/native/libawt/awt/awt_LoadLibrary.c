@@ -89,6 +89,9 @@ JNIEXPORT jboolean JNICALL AWTIsHeadless() {
 #ifdef MACOSX
   #define LWAWT_PATH "/libawt_lwawt.dylib"
   #define DEFAULT_PATH LWAWT_PATH
+#elif defined(__HAIKU__)
+  #define LWAWT_PATH "/libawt_lwawt.so"
+  #define DEFAULT_PATH LWAWT_PATH
 #else
   #define XAWT_PATH "/libawt_xawt.so"
   #define DEFAULT_PATH XAWT_PATH
@@ -120,6 +123,8 @@ AWT_OnLoad(JavaVM *vm, void *reserved)
      */
 
 #ifdef MACOSX
+    tk = LWAWT_PATH;
+#elif defined(__HAIKU__)
     tk = LWAWT_PATH;
 #else
     tk = XAWT_PATH;

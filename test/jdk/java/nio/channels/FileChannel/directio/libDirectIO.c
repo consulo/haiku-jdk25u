@@ -90,6 +90,7 @@ JNIEXPORT jboolean Java_DirectIOTest_isFileInCache(JNIEnv *env,
     }
     f_seg = malloc(index);
     if (f_seg != NULL) {
+#ifndef __HAIKU__
         if(mincore(f_mmap, file_size, f_seg) == 0) {
             size_t i;
             for (i = 0; i < index; i++) {
@@ -99,6 +100,7 @@ JNIEXPORT jboolean Java_DirectIOTest_isFileInCache(JNIEnv *env,
                 }
             }
         }
+#endif
         free(f_seg);
     } else {
         ThrowException(env, "java/io/IOException",

@@ -50,6 +50,10 @@
 #define IPV6_FLOWINFO_SEND      33
 #endif
 
+#ifdef __HAIKU__
+#define DONT_ENABLE_IPV6 1
+#endif
+
 /* Perform platform specific initialization.
  * Returns 0 on success, non-0 on failure */
 int

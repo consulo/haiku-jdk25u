@@ -196,10 +196,12 @@ ifeq ($(ENABLE_HEADLESS_ONLY), false)
     LIBSPLASHSCREEN_CFLAGS += -DPNG_POWERPC_VSX_OPT=0
   endif
 
-  ifeq ($(call isTargetOs, macosx), true)
-    # libsplashscreen on macosx does not use the unix code
+  ifeq ($(call isTargetOs, macosx haiku), true)
+    # libsplashscreen on macosx and haiku does not use the unix code
     LIBSPLASHSCREEN_EXCLUDE_SRC_PATTERNS := /unix/
+  endif
 
+  ifeq ($(call isTargetOs, macosx), true)
     BUILD_LIBSPLASHSCREEN_java_awt_SplashScreen.c_CFLAGS := -x objective-c -O0
     BUILD_LIBSPLASHSCREEN_splashscreen_gfx_impl.c_CFLAGS := -x objective-c -O0
     BUILD_LIBSPLASHSCREEN_splashscreen_gif.c_CFLAGS := -x objective-c -O0
@@ -213,6 +215,9 @@ ifeq ($(ENABLE_HEADLESS_ONLY), false)
     LIBSPLASHSCREEN_CFLAGS += -DWITH_MACOSX
   else ifeq ($(call isTargetOs, windows), true)
     LIBSPLASHSCREEN_CFLAGS += -DWITH_WIN32
+  else ifeq ($(call isTargetOs, haiku), true)
+    LIBSPLASHSCREEN_CFLAGS += -DWITH_HAIKU
+    LIBSPLASHSCREEN_HEADER_DIRS += libhaikuapp
   else
     LIBSPLASHSCREEN_CFLAGS += -DWITH_X11 $(X_CFLAGS)
   endif
@@ -262,6 +267,7 @@ ifeq ($(ENABLE_HEADLESS_ONLY), false)
       LDFLAGS_windows := -delayload:user32.dll, \
       JDK_LIBS_windows := java.base:libjava, \
       JDK_LIBS_macosx := libosxapp, \
+      JDK_LIBS_haiku := libhaikuapp, \
       LIBS := $(GIFLIB_LIBS) $(LIBJPEG_LIBS) $(LIBZ_LIBS) $(PNG_LIBS) $(ICONV_LIBS), \
       LIBS_unix := $(LIBM) $(LIBPTHREAD), \
       LIBS_linux := $(LIBDL) $(X_LIBS) -lX11 -lXext, \
@@ -271,6 +277,7 @@ ifeq ($(ENABLE_HEADLESS_ONLY), false)
           -framework Foundation \
           -framework Metal \
           -framework Security, \
+      LIBS_haiku := -lbe -lstdc++ -liconv, \
       LIBS_aix := $(LIBDL) $(X_LIBS) -lX11 -lXext, \
       LIBS_windows := delayimp.lib gdi32.lib kernel32.lib user32.lib, \
       STATIC_LIB_EXCLUDE_OBJS := $(LIBSPLASHSCREEN_STATIC_LIB_EXCLUDE_OBJS), \
@@ -377,7 +384,7 @@ endif
 
 ifeq ($(call isTargetOs, windows), true)
   LIBFONTMANAGER_EXCLUDE_FILES += X11FontScaler.c X11TextRenderer.c
-else ifeq ($(call isTargetOs, macosx), true)
+else ifeq ($(call isTargetOs, macosx haiku), true)
   LIBFONTMANAGER_EXCLUDE_FILES += X11FontScaler.c X11TextRenderer.c \
       fontpath.c lcdglyph.c
 else
@@ -410,6 +417,7 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBFONTMANAGER, \
     LDFLAGS_aix := -Wl$(COMMA)-berok, \
     JDK_LIBS := libawt java.base:libjava $(LIBFONTMANAGER_JDK_LIBS), \
     JDK_LIBS_macosx := libawt_lwawt, \
+    JDK_LIBS_haiku := libawt_lwawt, \
     JDK_LIBS_unix := java.base:libjvm, \
     LIBS := $(LIBFONTMANAGER_LIBS), \
     LIBS_unix := $(LIBM), \
@@ -417,6 +425,7 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBFONTMANAGER, \
         -framework CoreFoundation \
         -framework CoreGraphics \
         -framework CoreText, \
+    LIBS_haiku := -lbe -lstdc++, \
     LIBS_windows := advapi32.lib gdi32.lib user32.lib, \
 ))
 

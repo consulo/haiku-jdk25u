@@ -43,6 +43,8 @@
 #elif defined(_ALLBSD_SOURCE)
   /* Also defined in net/bsd_close.c */
   #define INTERRUPT_SIGNAL SIGIO
+#elif defined(__HAIKU__)
+  #define INTERRUPT_SIGNAL (SIGRTMAX - 2)
 #else
   #error "missing platform-specific definition here"
 #endif
