@@ -42,6 +42,8 @@ ifeq ($(call check-jvm-feature, compiler2), true)
   else ifeq ($(call isBuildOs, aix), true)
     ADLC_LDFLAGS += -m64
     ADLC_CFLAGS := -fno-rtti -fexceptions -ffunction-sections -m64 -DAIX -mcpu=pwr8
+  else ifeq ($(call isBuildOs, haiku), true)
+    ADLC_CFLAGS := -fno-exceptions -DHAIKU
   else ifeq ($(call isBuildOs, windows), true)
     ADLC_CFLAGS := -nologo -EHsc
     ADLC_CFLAGS_WARNINGS := -W3 -D_CRT_SECURE_NO_WARNINGS
@@ -106,6 +108,8 @@ ifeq ($(call check-jvm-feature, compiler2), true)
     ifeq ($(HOTSPOT_TARGET_CPU_ARCH), aarch64)
       ADLCFLAGS += -DR18_RESERVED
     endif
+  else ifeq ($(call isTargetOs, haiku), true)
+    ADLCFLAGS += -DHAIKU=1 -D_GNU_SOURCE=1
   else ifeq ($(call isTargetOs, windows), true)
     ADLCFLAGS += -D_WIN64=1
     ifeq ($(HOTSPOT_TARGET_CPU_ARCH), aarch64)

@@ -31,14 +31,16 @@ include LibCommon.gmk
 ## Build libextnet
 ################################################################################
 
-$(eval $(call SetupJdkLibrary, BUILD_LIBEXTNET, \
-    NAME := extnet, \
-    OPTIMIZATION := LOW, \
-    EXTRA_HEADER_DIRS := java.base:libjvm, \
-    JDK_LIBS := java.base:libjava, \
-    LIBS_windows := ws2_32.lib, \
-))
+ifneq ($(call isTargetOs, haiku), true)
+  $(eval $(call SetupJdkLibrary, BUILD_LIBEXTNET, \
+      NAME := extnet, \
+      OPTIMIZATION := LOW, \
+      EXTRA_HEADER_DIRS := java.base:libjvm, \
+      JDK_LIBS := java.base:libjava, \
+      LIBS_windows := ws2_32.lib, \
+  ))
 
-TARGETS += $(BUILD_LIBEXTNET)
+  TARGETS += $(BUILD_LIBEXTNET)
+endif
 
 ################################################################################

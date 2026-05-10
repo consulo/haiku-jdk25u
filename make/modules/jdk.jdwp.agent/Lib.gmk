@@ -39,6 +39,7 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBDT_SOCKET, \
         include \
         libjdwp/export, \
     LIBS_linux := $(LIBPTHREAD), \
+    LIBS_haiku := -lnetwork, \
     LIBS_windows := iphlpapi.lib ws2_32.lib, \
 ))
 
@@ -77,6 +78,7 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBJDWP, \
     JDK_LIBS := java.base:libjvm, \
     LIBS := $(ICONV_LIBS), \
     LIBS_linux := $(LIBDL), \
+    LIBS_haiku := -liconv, \
 ))
 
 TARGETS += $(BUILD_LIBJDWP)

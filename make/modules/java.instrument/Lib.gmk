@@ -40,11 +40,13 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBINSTRUMENT, \
     CFLAGS_debug := -DJPLIS_LOGGING, \
     CFLAGS_release := -DNO_JPLIS_LOGGING, \
     LDFLAGS := $(ICONV_LDFLAGS), \
+    LDFLAGS_haiku := -L$(SUPPORT_OUTPUTDIR)/native/java.base, \
     JDK_LIBS := java.base:libjava java.base:libjli java.base:libjvm, \
     LIBS := $(ICONV_LIBS), \
     LIBS_unix := $(LIBZ_LIBS), \
     LIBS_linux := $(LIBDL), \
     LIBS_aix := $(LIBDL), \
+    LIBS_haiku := -liconv -ljli, \
     LIBS_macosx := \
         -framework ApplicationServices \
         -framework Cocoa \

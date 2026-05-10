@@ -52,7 +52,7 @@ ifeq ($(call isTargetOs, aix), false)
       #
 
   LIBJSOUND_LINK_TYPE := C
-  ifeq ($(call isTargetOs, macosx), true)
+  ifeq ($(call isTargetOs, macosx haiku), true)
     LIBJSOUND_LINK_TYPE := C++
   endif
 
@@ -76,10 +76,27 @@ ifeq ($(call isTargetOs, aix), false)
           -framework CoreFoundation \
           -framework CoreMIDI \
           -framework CoreServices, \
+      LIBS_haiku := -lmedia -lmidi2 -lbe -lstdc++, \
       LIBS_windows := advapi32.lib dsound.lib ole32.lib user32.lib winmm.lib, \
   ))
 
   TARGETS += $(BUILD_LIBJSOUND)
+endif
+
+ifeq ($(call isTargetOs, haiku), true)
+  ##############################################################################
+  # Build libhaikuapp
+  ##############################################################################
+
+  $(eval $(call SetupJdkLibrary, BUILD_LIBHAIKUAPP, \
+      NAME := haikuapp, \
+      LINK_TYPE := C++, \
+      OPTIMIZATION := LOW, \
+      DISABLED_WARNINGS_gcc := unused-variable unused-parameter, \
+      LIBS := -lbe -lstdc++, \
+  ))
+
+  TARGETS += $(BUILD_LIBHAIKUAPP)
 endif
 
 ifeq ($(call isTargetOs, macosx), true)
