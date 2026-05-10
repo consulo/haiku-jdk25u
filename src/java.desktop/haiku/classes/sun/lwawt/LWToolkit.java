@@ -369,7 +369,8 @@ public abstract class LWToolkit extends SunToolkit implements Runnable {
 
     @Override
     public final boolean isTaskbarSupported() {
-        return true;
+        // Haiku LWAWT has no TaskbarPeer implementation.
+        return false;
     }
 
     @Override
