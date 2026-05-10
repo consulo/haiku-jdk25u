@@ -27,16 +27,11 @@ package sun.awt;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 public class PlatformGraphicsInfo {
 
     static {
-        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-            System.loadLibrary("awt");
-            return null;
-        });
+        System.loadLibrary("awt");
     }
 
     public static GraphicsEnvironment createGE() {

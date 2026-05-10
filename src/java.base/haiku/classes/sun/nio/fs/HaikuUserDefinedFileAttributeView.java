@@ -201,7 +201,7 @@ class HaikuUserDefinedFileAttributeView
 
                 // copy from buffer into backing array if necessary
                 if (nb != null) {
-                    int off = dst.arrayOffset() + pos + Unsafe.ARRAY_BYTE_BASE_OFFSET;
+                    long off = dst.arrayOffset() + pos + Unsafe.ARRAY_BYTE_BASE_OFFSET;
                     unsafe.copyMemory(null, address, dst.array(), off, n);
                 }
                 dst.position(pos + n);
@@ -245,7 +245,7 @@ class HaikuUserDefinedFileAttributeView
 
             if (src.hasArray()) {
                 // copy from backing array into buffer
-                int off = src.arrayOffset() + pos + Unsafe.ARRAY_BYTE_BASE_OFFSET;
+                long off = src.arrayOffset() + pos + Unsafe.ARRAY_BYTE_BASE_OFFSET;
                 unsafe.copyMemory(src.array(), off, null, address, rem);
             } else {
                 // backing array not accessible so transfer via temporary array
