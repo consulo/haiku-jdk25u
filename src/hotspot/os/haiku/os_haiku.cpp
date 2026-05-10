@@ -970,10 +970,6 @@ void os::jvm_path(char *buf, jint buflen) {
   if (rp == NULL)
     return;
 
-  // Note: jdk25u removed Arguments::sun_java_launcher_is_altjvm(); the altjvm
-  // path-fixup logic is no longer needed — the resolved libjvm path is
-  // sufficient.
-
   strncpy(saved_jvm_path, buf, MAXPATHLEN);
   saved_jvm_path[MAXPATHLEN - 1] = '\0';
 }
@@ -1659,9 +1655,6 @@ jlong os::seek_to_file_offset(int fd, jlong offset) {
   return (jlong)::lseek(fd, (off_t)offset, SEEK_SET);
 }
 
-// os::available(int, jlong*) was removed from os.hpp in jdk25u.
-// (Replaced by os.cpp's portable handling via the JDK side.)
-
 // Map a block of memory.
 char* os::pd_map_memory(int fd, const char* file_name, size_t file_offset,
                      char *addr, size_t bytes, bool read_only,
@@ -1861,14 +1854,6 @@ void os::prepare_native_symbols() {
 size_t os::vm_min_address() {
   assert(is_aligned(_vm_min_address_default, os::vm_allocation_granularity()), "Sanity");
   return _vm_min_address_default;
-}
-
-jlong os::total_swap_space() {
-  return -1;
-}
-
-jlong os::free_swap_space() {
-  return -1;
 }
 
 void os::pd_disclaim_memory(char *addr, size_t bytes) {
