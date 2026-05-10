@@ -621,6 +621,10 @@ void os::Posix::print_rlimit_info(outputStream* st) {
   st->print("%ld", sysconf(_SC_CHILD_MAX));
 
   print_rlimit(st, ", THREADS", RLIMIT_THREADS);
+#elif defined(__HAIKU__)
+  // Haiku has no RLIMIT_NPROC; report system-wide CHILD_MAX instead.
+  st->print(", NPROC ");
+  st->print("%ld", sysconf(_SC_CHILD_MAX));
 #else
   print_rlimit(st, ", NPROC", RLIMIT_NPROC);
 #endif

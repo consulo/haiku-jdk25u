@@ -26,18 +26,28 @@
 #define OS_HAIKU_OS_HAIKU_HPP
 
 #include <SupportDefs.h>
+#include <inttypes.h>
 
 #define OSTHREADID_FORMAT      "%" B_PRIx32
 #define OSTHREADID_FORMAT2     "%2" B_PRId32
 #define OSTHREADID_FORMAT_HEX  "%" B_PRIx32
 #define OSTHREADID_FORMAT_HEX2 "%2" B_PRIx32
 
+// Legacy format-macro shims — removed from share/utilities/globalDefinitions.hpp
+// in jdk25u but still used by haiku ports.
+#ifndef UINTX_FORMAT
+#define UINTX_FORMAT  "%" PRIuPTR
+#endif
+#ifndef SIZE_FORMAT
+#define SIZE_FORMAT   "%zu"
+#endif
+
 // Haiku_OS defines the interface to the Haiku operating system
 
 // Information about the protection of the page at address '0' on this os.
 static bool zero_page_read_protected() { return true; }
 
-class Haiku {
+class os::Haiku {
   friend class os;
 
  protected:
@@ -46,7 +56,7 @@ class Haiku {
   static pthread_t _main_thread;
   static int _page_size;
 
-  static julong available_memory();
+  static bool available_memory(physical_memory_size_type& value);
   static julong physical_memory() { return _physical_memory; }
   static void initialize_system_info();
 

@@ -132,15 +132,32 @@ static int clock_tics_per_sec = 0;
 ////////////////////////////////////////////////////////////////////////////////
 // utility functions
 
-julong os::available_memory() {
-  return Haiku::available_memory();
+bool os::available_memory(physical_memory_size_type& value) {
+  return Haiku::available_memory(value);
 }
 
-julong os::Haiku::available_memory() {
-  system_info si;
-  get_system_info(&si);
+bool os::free_memory(physical_memory_size_type& value) {
+  return Haiku::available_memory(value);
+}
 
-  return (julong)(si.max_pages - si.used_pages) * page_size();
+bool os::Haiku::available_memory(physical_memory_size_type& value) {
+  system_info si;
+  if (get_system_info(&si) != B_OK) {
+    return false;
+  }
+  value = (physical_memory_size_type)(si.max_pages - si.used_pages) * B_PAGE_SIZE;
+  return true;
+}
+
+bool os::total_swap_space(physical_memory_size_type& value) {
+  // Haiku does not expose a swap-space query. Return 0 as best effort.
+  value = 0;
+  return true;
+}
+
+bool os::free_swap_space(physical_memory_size_type& value) {
+  value = 0;
+  return true;
 }
 
 void os::Haiku::print_uptime_info(outputStream* st) {
@@ -918,8 +935,10 @@ void os::print_memory_info(outputStream* st) {
 
   st->print(", physical " UINT64_FORMAT "k",
             os::physical_memory() >> 10);
-  st->print("(" UINT64_FORMAT "k free)",
-            os::available_memory() >> 10);
+  physical_memory_size_type avail = 0;
+  if (os::available_memory(avail)) {
+    st->print("(" UINT64_FORMAT "k free)", (uint64_t)avail >> 10);
+  }
   st->cr();
 }
 
@@ -951,57 +970,9 @@ void os::jvm_path(char *buf, jint buflen) {
   if (rp == NULL)
     return;
 
-  if (Arguments::sun_java_launcher_is_altjvm()) {
-    // Support for the gamma launcher.  Typical value for buf is
-    // "<JAVA_HOME>/jre/lib/<vmtype>/libjvm.so".  If "/jre/lib/" appears at
-    // the right place in the string, then assume we are installed in a JDK and
-    // we're done.  Otherwise, check for a JAVA_HOME environment variable and fix
-    // up the path so it looks like libjvm.so is installed there (append a
-    // fake suffix hotspot/libjvm.so).
-    const char *p = buf + strlen(buf) - 1;
-    for (int count = 0; p > buf && count < 5; ++count) {
-      for (--p; p > buf && *p != '/'; --p)
-        /* empty */ ;
-    }
-
-    if (strncmp(p, "/jre/lib/", 9) != 0) {
-      // Look for JAVA_HOME in the environment.
-      char* java_home_var = ::getenv("JAVA_HOME");
-      if (java_home_var != NULL && java_home_var[0] != 0) {
-        char* jrelib_p;
-        int len;
-
-        // Check the current module name "libjvm.so".
-        p = strrchr(buf, '/');
-        assert(strstr(p, "/libjvm") == p, "invalid library name");
-
-        rp = realpath(java_home_var, buf, buflen);
-        if (rp == NULL)
-          return;
-
-        // determine if this is a legacy image or modules image
-        // modules image doesn't have "jre" subdirectory
-        len = strlen(buf);
-        assert(len < buflen, "Ran out of buffer room");
-        jrelib_p = buf + len;
-        snprintf(jrelib_p, buflen-len, "/jre/lib");
-        if (0 != access(buf, F_OK)) {
-          snprintf(jrelib_p, buflen-len, "/lib");
-        }
-
-        if (0 == access(buf, F_OK)) {
-          // Use current module name "libjvm.so"
-          len = strlen(buf);
-          snprintf(buf + len, buflen-len, "/hotspot/libjvm.so");
-        } else {
-          // Go back to path of .so
-          rp = realpath(dli_fname, buf, buflen);
-          if (rp == NULL)
-            return;
-        }
-      }
-    }
-  }
+  // Note: jdk25u removed Arguments::sun_java_launcher_is_altjvm(); the altjvm
+  // path-fixup logic is no longer needed — the resolved libjvm path is
+  // sufficient.
 
   strncpy(saved_jvm_path, buf, MAXPATHLEN);
   saved_jvm_path[MAXPATHLEN - 1] = '\0';
@@ -1111,10 +1082,6 @@ void os::pd_realign_memory(char *addr, size_t bytes, size_t alignment_hint) {
 
 size_t os::pd_pretouch_memory(void* first, void* last, size_t page_size) {
   return page_size;
-}
-
-julong os::free_memory() {
-  return Haiku::available_memory();
 }
 
 void os::jfr_report_memory_info() {
@@ -1692,34 +1659,8 @@ jlong os::seek_to_file_offset(int fd, jlong offset) {
   return (jlong)::lseek(fd, (off_t)offset, SEEK_SET);
 }
 
-// This code originates from JDK's sysAvailable
-// from src/solaris/hpi/src/native_threads/src/sys_api_td.c
-
-int os::available(int fd, jlong *bytes) {
-  jlong cur, end;
-  int mode;
-  struct stat buf;
-
-  if (::fstat(fd, &buf) >= 0) {
-    mode = buf.st_mode;
-    if (S_ISCHR(mode) || S_ISFIFO(mode) || S_ISSOCK(mode)) {
-      int n;
-      if (::ioctl(fd, FIONREAD, &n) >= 0) {
-        *bytes = n;
-        return 1;
-      }
-    }
-  }
-  if ((cur = ::lseek(fd, 0L, SEEK_CUR)) == -1) {
-    return 0;
-  } else if ((end = ::lseek(fd, 0L, SEEK_END)) == -1) {
-    return 0;
-  } else if (::lseek(fd, cur, SEEK_SET) == -1) {
-    return 0;
-  }
-  *bytes = end - cur;
-  return 1;
-}
+// os::available(int, jlong*) was removed from os.hpp in jdk25u.
+// (Replaced by os.cpp's portable handling via the JDK side.)
 
 // Map a block of memory.
 char* os::pd_map_memory(int fd, const char* file_name, size_t file_offset,
