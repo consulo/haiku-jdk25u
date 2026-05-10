@@ -25,19 +25,12 @@
 
 package sun.nio.ch;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 /**
  * Creates this platform's default SelectorProvider
  */
 
 public class DefaultSelectorProvider {
-    private static final SelectorProviderImpl INSTANCE;
-    static {
-        PrivilegedAction<SelectorProviderImpl> pa = PollSelectorProvider::new;
-        INSTANCE = AccessController.doPrivileged(pa);
-    }
+    private static final SelectorProviderImpl INSTANCE = new PollSelectorProvider();
 
     /**
      * Prevent instantiation.
