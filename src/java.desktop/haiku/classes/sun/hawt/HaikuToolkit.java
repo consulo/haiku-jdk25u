@@ -40,6 +40,7 @@ import sun.awt.datatransfer.DataTransferer;
 import sun.lwawt.*;
 import sun.lwawt.LWWindowPeer.PeerType;
 
+@SuppressWarnings("restricted")
 public class HaikuToolkit extends LWToolkit {
     private static final int BUTTONS = 3;
 

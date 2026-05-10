@@ -28,6 +28,7 @@ package sun.awt;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 
+@SuppressWarnings("restricted")
 public class PlatformGraphicsInfo {
 
     static {
