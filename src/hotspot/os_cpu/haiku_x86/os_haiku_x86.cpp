@@ -75,12 +75,14 @@
 #define REG_SP rsp
 #define REG_PC rip
 #define REG_FP rbp
+#define REG_BCP r13
 #define SPELL_REG_SP "rsp"
 #define SPELL_REG_FP "rbp"
 #else
 #define REG_SP esp
 #define REG_PC eip
 #define REG_FP ebp
+#define REG_BCP esi
 #define SPELL_REG_SP "esp"
 #define SPELL_REG_FP "ebp"
 #endif // AMD64
@@ -179,6 +181,13 @@ frame os::fetch_compiled_frame_from_context(const void* ucVoid) {
   // in compiled code, the stack banging is performed just after the return pc
   // has been pushed on the stack
   return frame(fr.sp() + 1, fr.fp(), (address)*(fr.sp()));
+}
+
+intptr_t* os::fetch_bcp_from_context(const void* ucVoid) {
+  assert(ucVoid != nullptr, "invariant");
+  const ucontext_t* uc = (const ucontext_t*)ucVoid;
+  assert(os::Posix::ucontext_is_interpreter(uc), "invariant");
+  return (intptr_t*)uc->uc_mcontext.REG_BCP;
 }
 
 // By default, gcc always save frame pointer (%ebp/%rbp) on stack. It may get
@@ -536,22 +545,6 @@ void os::print_context(outputStream *st, const void *context) {
   st->cr();
 }
 
-void os::print_tos_pc(outputStream *st, const void *context) {
-  if (context == NULL) return;
-
-  const ucontext_t* uc = (const ucontext_t*)context;
-
-  address sp = (address)os::Haiku::ucontext_get_sp(uc);
-  print_tos_pc(st, sp);
-  st->cr();
-
-  // Note: it may be unsafe to inspect memory near pc. For example, pc may
-  // point to garbage if entry point in an nmethod is corrupted. Leave
-  // this at the end, and hope for the best.
-  address pc = os::Posix::ucontext_get_pc(uc);
-  os::print_instructions(st, pc, sizeof(char));
-  st->cr();
-}
 
 /*
 void os::print_register_info(outputStream *st, const void *context) {

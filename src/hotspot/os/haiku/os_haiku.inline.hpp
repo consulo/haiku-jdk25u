@@ -36,6 +36,10 @@
 #include <sys/poll.h>
 #include <netdb.h>
 
+inline bool os::zero_page_read_protected() {
+  return true;
+}
+
 inline bool os::uses_stack_guard_pages() {
   return true;
 }
