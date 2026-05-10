@@ -30,17 +30,38 @@ import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.util.ArrayList;
 
+import sun.java2d.SunGraphicsEnvironment;
+
 public class HaikuGraphicsDevice extends GraphicsDevice {
 
     private final int displayID;
     private final HaikuGraphicsConfig config;
+    private volatile int scale;
 
     private native double nativeGetScreenResolution(int displayID,
         double[] resolution);
+    private static native double nativeGetScaleFactor(int displayID);
 
     public HaikuGraphicsDevice(int displayID) {
         this.displayID = displayID;
         config = new HaikuGraphicsConfig(this);
+        initScaleFactor();
+    }
+
+    public int getScaleFactor() {
+        return scale;
+    }
+
+    private void initScaleFactor() {
+        if (SunGraphicsEnvironment.isUIScaleEnabled()) {
+            double debugScale = SunGraphicsEnvironment.getDebugScale();
+            scale = (int) (debugScale >= 1
+                    ? Math.round(debugScale)
+                    : Math.round(nativeGetScaleFactor(displayID)));
+            if (scale < 1) scale = 1;
+        } else {
+            scale = 1;
+        }
     }
 
     @Override

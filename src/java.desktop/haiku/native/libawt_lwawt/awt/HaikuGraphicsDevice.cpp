@@ -26,10 +26,34 @@
 #include <jni.h>
 
 #include <Screen.h>
+#include <Font.h>
+#include <InterfaceDefs.h>
+#include <algorithm>
 
 #include "Utilities.h"
 
 extern "C" {
+
+/*
+ * Class:     sun_hawt_HaikuGraphicsDevice
+ * Method:    nativeGetScaleFactor
+ * Signature: (I)D
+ *
+ * Haiku has no direct screen-scale API. Per the Haiku-recommended
+ * heuristic (https://discuss.haiku-os.org/t/getting-the-screen-dpi/13121/5),
+ * derive scale from the user's plain-font size relative to the 12pt baseline.
+ */
+JNIEXPORT jdouble JNICALL
+Java_sun_hawt_HaikuGraphicsDevice_nativeGetScaleFactor(JNIEnv *env,
+    jclass clazz, jint displayID)
+{
+    if (be_plain_font == NULL) {
+        return 1.0;
+    }
+    float scale = be_plain_font->Size() / 12.0f;
+    if (scale < 1.0f) scale = 1.0f;
+    return (jdouble) scale;
+}
 
 /*
  * Class:     sun_hawt_HaikuGraphicsDevice
