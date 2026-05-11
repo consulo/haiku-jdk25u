@@ -143,6 +143,10 @@ Java_sun_hawt_HaikuPlatformWindow_nativeSetBounds(JNIEnv *env, jobject thiz,
 	if (!window->LockLooper())
 		return;
 
+	// Make sure the cached insets reflect the real decorator dimensions —
+	// at HiDPI the construction-time fallback is wildly wrong.
+	window->RefreshInsets();
+
 	// given coordinates include the decorator frame, transform to
 	// the client area
 	BRect rect = window->TransformFromFrame(frameRect);
@@ -280,6 +284,7 @@ Java_sun_hawt_HaikuPlatformWindow_nativeSetSizeConstraints(JNIEnv *env,
 	if (!window->LockLooper())
 		return;
 
+	window->RefreshInsets();
 	window->AdjustDimensions(minWidth, minHeight);
 	window->AdjustDimensions(maxWidth, maxHeight);
 	if (maxWidth > 32768) {
@@ -658,6 +663,10 @@ PlatformWindow::AdjustDimensions(int& width, int& height)
 void
 PlatformWindow::_Reshape(bool resize)
 {
+	// Keep fInsets in sync with the actual decorator before computing
+	// the frame rectangle reported back to Java — see RefreshInsets().
+	fInsets = GetInsets();
+
 	BRect bounds = Frame();
 
 	int w = bounds.IntegerWidth() + 2;

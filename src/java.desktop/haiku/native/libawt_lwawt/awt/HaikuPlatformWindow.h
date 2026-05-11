@@ -79,6 +79,12 @@ public:
 			BRect			TransformToFrame(BRect rect);
 			void			AdjustDimensions(int& width, int& height);
 
+			// GetDecoratorSettings() is not available until the window is
+			// shown, so the fInsets cached at construction may be wrong
+			// (hardcoded non-HiDPI fallback). Call this before consuming
+			// fInsets in any sizing math.
+			void			RefreshInsets() { fInsets = GetInsets(); }
+
 public:
 			int				blocked_windows;
 
