@@ -64,6 +64,16 @@ class HaikuDrawableSurfaceData extends SurfaceData {
     }
 
     @Override
+    public double getDefaultScaleX() {
+        return ((HaikuGraphicsConfig) config).getScale();
+    }
+
+    @Override
+    public double getDefaultScaleY() {
+        return ((HaikuGraphicsConfig) config).getScale();
+    }
+
+    @Override
     public Object getDestination() {
         return null;
     }

@@ -43,13 +43,6 @@ class HaikuWindowSurfaceData extends HaikuDrawableSurfaceData {
     }
 
     @Override
-    public Rectangle getBounds() {
-        Rectangle bounds = window.getBounds();
-        bounds.x = bounds.y = 0;
-        return bounds;
-    }
-
-    @Override
     public Object getDestination() {
         return (Object)window.getTarget();
     }
