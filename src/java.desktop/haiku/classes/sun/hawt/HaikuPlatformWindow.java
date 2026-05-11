@@ -552,8 +552,12 @@ public class HaikuPlatformWindow implements PlatformWindow {
     public void eventMouse(int id, long when, int modifiers, int x, int y,
             int screenX, int screenY, int clicks, int button) {
         HaikuGraphicsConfig gc = gc();
-        x = gc.scaleDown(x);
-        y = gc.scaleDown(y);
+        // Haiku reports x/y in view-local (content-area) coords. AWT expects
+        // them relative to the JFrame (including decorations), so shift by
+        // insets so a click at the top-left of the content area lands at
+        // logical (insets.left, insets.top) — the contentPane origin.
+        x = gc.scaleDown(x) + insets.left;
+        y = gc.scaleDown(y) + insets.top;
         screenX = gc.scaleDown(screenX);
         screenY = gc.scaleDown(screenY);
         // Popup = press button 2 or ctrl press button 1
@@ -569,8 +573,8 @@ public class HaikuPlatformWindow implements PlatformWindow {
     public void eventWheel(long when, int modifiers, int x, int y, int scrollType,
             int scrollAmount, int wheelRotation, double preciseWheelRotation) {
         HaikuGraphicsConfig gc = gc();
-        x = gc.scaleDown(x);
-        y = gc.scaleDown(y);
+        x = gc.scaleDown(x) + insets.left;
+        y = gc.scaleDown(y) + insets.top;
         peer.notifyMouseWheelEvent(when, x, y, modifiers, scrollType,
             scrollAmount, wheelRotation, preciseWheelRotation, null);
     }
