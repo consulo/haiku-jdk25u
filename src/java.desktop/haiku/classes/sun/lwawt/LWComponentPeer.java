@@ -453,7 +453,21 @@ public abstract class LWComponentPeer<T extends Component, D extends JComponent>
     private void applyConstrain(final Graphics g) {
         final SunGraphics2D sg2d = (SunGraphics2D) g;
         final Rectangle size = localToWindow(getSize());
-        sg2d.constrain(size.x, size.y, size.width, size.height, getVisibleRegion());
+        int padW = 0, padH = 0;
+        // For the top-level peer, HaikuPlatformWindow.transformGraphics has
+        // applied translate(-insets.left, -insets.top) on the Graphics.
+        // SunGraphics2D.constrain reads the resulting transform.translate
+        // values as the clip origin; the negative translate then truncates
+        // the writable area on the right and bottom by inset*scale device
+        // pixels. Compensating by enlarging size by (insets.left, insets.top)
+        // makes the clip cover the full surface again.
+        if (this == getWindowPeerOrSelf()) {
+            Insets ins = getWindowPeerOrSelf().getInsets();
+            padW = ins.left;
+            padH = ins.top;
+        }
+        sg2d.constrain(size.x, size.y,
+                size.width + padW, size.height + padH, getVisibleRegion());
     }
 
     Region getVisibleRegion() {

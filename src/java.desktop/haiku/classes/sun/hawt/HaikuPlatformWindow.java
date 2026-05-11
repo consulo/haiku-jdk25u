@@ -326,6 +326,7 @@ public class HaikuPlatformWindow implements PlatformWindow {
 
     @Override
     public Graphics transformGraphics(Graphics g) {
+        g.translate(-insets.left, -insets.top);
         return g;
     }
 
