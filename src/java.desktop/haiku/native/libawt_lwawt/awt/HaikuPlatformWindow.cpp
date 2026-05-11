@@ -659,9 +659,12 @@ void
 PlatformWindow::_Reshape(bool resize)
 {
 	BRect bounds = Frame();
+	// Drawable is sized to the full frame (incl. decoration area) so that
+	// AWT can render into frame-coordinate space without a translate.
+	BRect frame = TransformToFrame(bounds);
 
-	int w = bounds.IntegerWidth() + 2;
-	int h = bounds.IntegerHeight() + 2;
+	int w = frame.IntegerWidth() + 2;
+	int h = frame.IntegerHeight() + 2;
 
 	if (resize) {
 		Drawable* drawable = fView->GetDrawable();
@@ -676,9 +679,6 @@ PlatformWindow::_Reshape(bool resize)
 			drawable->Unlock();
 		}
 	}
-
-	// transform bounds to include the decorations
-	BRect frame = TransformToFrame(bounds);
 
 	// Should probably execute handler on EDT instead of unlocking here
 	UnlockLooper();

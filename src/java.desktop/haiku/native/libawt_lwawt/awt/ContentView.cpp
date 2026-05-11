@@ -41,6 +41,8 @@ ContentView::ContentView(jobject platformWindow)
 	BView(BRect(0, 0, 0, 0), NULL, B_FOLLOW_ALL,
 		B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE),
 	fDrawable(this),
+	fLeftInset(0),
+	fTopInset(0),
 	fPlatformWindow(platformWindow),
 	fDropTargetComponent(NULL),
 	fDropTargetContext(NULL),

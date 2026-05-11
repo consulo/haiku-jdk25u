@@ -93,7 +93,11 @@ ContentView::DeferredDraw(BRect updateRect)
 	}
 
 	if (fDrawable.IsValid()) {
-		DrawBitmapAsync(fDrawable.GetBitmap(), updateRect, updateRect);
+		// Drawable is frame-sized; content area starts at (fLeftInset, fTopInset)
+		// inside it. Source rect must be offset by inset; destination is the
+		// view-local updateRect unchanged.
+		BRect srcRect = updateRect.OffsetByCopy(fLeftInset, fTopInset);
+		DrawBitmapAsync(fDrawable.GetBitmap(), srcRect, updateRect);
 	}
 
 	fDrawable.Unlock();
