@@ -351,6 +351,11 @@ ifeq ($(call isTargetOs, macosx haiku), true)
 
   ifeq ($(call isTargetOs, haiku), true)
     LIBAWT_LWAWT_EXCLUDE_FILES += CUPSfuncs.c
+    # Haiku has no X11/GLX — exclude all OpenGL/X11 source.
+    LIBAWT_LWAWT_EXCLUDES += \
+        $(TOPDIR)/src/$(MODULE)/share/native/common/java2d/opengl \
+        $(TOPDIR)/src/$(MODULE)/unix/native/common/java2d/opengl \
+        $(TOPDIR)/src/$(MODULE)/unix/native/common/java2d/x11
   endif
 
   LIBAWT_LWAWT_STATIC_EXCLUDE_OBJS := systemScale.o
