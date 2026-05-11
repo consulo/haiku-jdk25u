@@ -150,6 +150,10 @@ Java_sun_hawt_HaikuPlatformWindow_nativeSetBounds(JNIEnv *env, jobject thiz,
 	// given coordinates include the decorator frame, transform to
 	// the client area
 	BRect rect = window->TransformFromFrame(frameRect);
+	fprintf(stderr, "[hawt] nativeSetBounds frame=(%d,%d %dx%d) -> "
+		"client=(%g,%g %dx%d)\n",
+		x, y, width, height,
+		rect.left, rect.top, rect.IntegerWidth(), rect.IntegerHeight());
 	window->MoveTo(rect.left, rect.top);
 	window->ResizeTo(rect.IntegerWidth(), rect.IntegerHeight());
 	window->UnlockLooper();
@@ -520,7 +524,8 @@ PlatformWindow::GetInsets()
 	float tabHeight = 21.0;
 
 	BMessage settings;
-	if (GetDecoratorSettings(&settings) == B_OK) {
+	status_t decResult = GetDecoratorSettings(&settings);
+	if (decResult == B_OK) {
 		BRect tabRect;
 		if (settings.FindRect("tab frame", &tabRect) == B_OK)
 			tabHeight = tabRect.Height();
@@ -533,6 +538,10 @@ PlatformWindow::GetInsets()
 		}
 		// else use fall-back values from above
 	}
+
+	fprintf(stderr, "[hawt] GetInsets: decoSettings=%s "
+		"borderWidth=%.1f tabHeight=%.1f Look=%d\n",
+		decResult == B_OK ? "OK" : "ERR", borderWidth, tabHeight, Look());
 
 	int menuHeight = 0;
 	if (fMenuBar != NULL) {
@@ -668,6 +677,13 @@ PlatformWindow::_Reshape(bool resize)
 	fInsets = GetInsets();
 
 	BRect bounds = Frame();
+	BRect viewBounds = fView->Bounds();
+	fprintf(stderr, "[hawt] _Reshape: Frame=(%g,%g %dx%d) "
+		"View.Bounds=(%dx%d) insets=(L%d T%d R%d B%d menu%d)\n",
+		bounds.left, bounds.top,
+		bounds.IntegerWidth(), bounds.IntegerHeight(),
+		viewBounds.IntegerWidth() + 1, viewBounds.IntegerHeight() + 1,
+		fInsets.left, fInsets.top, fInsets.right, fInsets.bottom, fInsets.menu);
 
 	int w = bounds.IntegerWidth() + 2;
 	int h = bounds.IntegerHeight() + 2;
