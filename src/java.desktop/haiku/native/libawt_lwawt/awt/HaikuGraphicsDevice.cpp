@@ -24,6 +24,8 @@
  */
 
 #include <jni.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <Screen.h>
 #include <Font.h>
@@ -47,11 +49,18 @@ JNIEXPORT jdouble JNICALL
 Java_sun_hawt_HaikuGraphicsDevice_nativeGetScaleFactor(JNIEnv *env,
     jclass clazz, jint displayID)
 {
+    bool debug = (getenv("HAIKU_J2D_UISCALE_DEBUG") != NULL);
     if (be_plain_font == NULL) {
+        if (debug) fprintf(stderr,
+            "[HaikuGraphicsDevice.cpp] be_plain_font is NULL; scale=1.0\n");
         return 1.0;
     }
-    float scale = be_plain_font->Size() / 12.0f;
+    float fontSize = be_plain_font->Size();
+    float scale = fontSize / 12.0f;
     if (scale < 1.0f) scale = 1.0f;
+    if (debug) fprintf(stderr,
+        "[HaikuGraphicsDevice.cpp] display=%d be_plain_font->Size()=%.2f "
+        "-> scale=%.2f\n", (int)displayID, fontSize, scale);
     return (jdouble) scale;
 }
 

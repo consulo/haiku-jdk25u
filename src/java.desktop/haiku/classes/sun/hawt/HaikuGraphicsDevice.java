@@ -52,15 +52,37 @@ public class HaikuGraphicsDevice extends GraphicsDevice {
         return scale;
     }
 
+    private static final boolean SCALE_DEBUG =
+            Boolean.getBoolean("sun.java2d.uiScale.debug");
+
     private void initScaleFactor() {
-        if (SunGraphicsEnvironment.isUIScaleEnabled()) {
-            double debugScale = SunGraphicsEnvironment.getDebugScale();
-            scale = (int) (debugScale >= 1
-                    ? Math.round(debugScale)
-                    : Math.round(nativeGetScaleFactor(displayID)));
+        boolean uiScaleEnabled = SunGraphicsEnvironment.isUIScaleEnabled();
+        double debugScale = -1;
+        double nativeScale = -1;
+
+        if (uiScaleEnabled) {
+            debugScale = SunGraphicsEnvironment.getDebugScale();
+            if (debugScale >= 1) {
+                scale = (int) Math.round(debugScale);
+            } else {
+                nativeScale = nativeGetScaleFactor(displayID);
+                scale = (int) Math.round(nativeScale);
+            }
             if (scale < 1) scale = 1;
         } else {
             scale = 1;
+        }
+
+        if (SCALE_DEBUG) {
+            System.err.printf(
+                "[HaikuGraphicsDevice] display=%d uiScaleEnabled=%b "
+                + "sun.java2d.uiScale=%s GDK_SCALE=%s J2D_UISCALE=%s "
+                + "debugScale=%.2f nativeScale=%.2f -> scale=%d%n",
+                displayID, uiScaleEnabled,
+                System.getProperty("sun.java2d.uiScale", "(unset)"),
+                System.getenv().getOrDefault("GDK_SCALE", "(unset)"),
+                System.getenv().getOrDefault("J2D_UISCALE", "(unset)"),
+                debugScale, nativeScale, scale);
         }
     }
 
