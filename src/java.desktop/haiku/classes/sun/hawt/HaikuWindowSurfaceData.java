@@ -43,6 +43,17 @@ class HaikuWindowSurfaceData extends HaikuDrawableSurfaceData {
     }
 
     @Override
+    public Rectangle getBounds() {
+        // Mirror X11SurfaceData: report window frame bounds in device pixels.
+        Rectangle r = window.getBounds();
+        int s = ((HaikuGraphicsConfig) window.getGraphicsConfiguration()).getScale();
+        r.x = r.y = 0;
+        r.width *= s;
+        r.height *= s;
+        return r;
+    }
+
+    @Override
     public Object getDestination() {
         return (Object)window.getTarget();
     }
