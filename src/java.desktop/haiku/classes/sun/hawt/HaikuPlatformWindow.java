@@ -207,7 +207,14 @@ public class HaikuPlatformWindow implements PlatformWindow {
     @Override
     public void setBounds(int x, int y, int width, int height) {
         bounds.setBounds(x, y, width, height);
-        nativeSetBounds(nativeWindow, x, y, width, height);
+        HaikuGraphicsConfig gc = gc();
+        nativeSetBounds(nativeWindow,
+            gc.scaleUp(x), gc.scaleUp(y),
+            gc.scaleUp(width), gc.scaleUp(height));
+    }
+
+    private HaikuGraphicsConfig gc() {
+        return (HaikuGraphicsConfig) peer.getGraphicsConfiguration();
     }
 
     @Override
@@ -285,8 +292,10 @@ public class HaikuPlatformWindow implements PlatformWindow {
     @Override
     public void setSizeConstraints(int minWidth, int minHeight, int maxWidth,
             int maxHeight) {
-        nativeSetSizeConstraints(nativeWindow, minWidth, minHeight, maxWidth,
-            maxHeight);
+        HaikuGraphicsConfig gc = gc();
+        nativeSetSizeConstraints(nativeWindow,
+            gc.scaleUp(minWidth), gc.scaleUp(minHeight),
+            gc.scaleUp(maxWidth), gc.scaleUp(maxHeight));
     }
 
     @Override
@@ -495,6 +504,11 @@ public class HaikuPlatformWindow implements PlatformWindow {
     public void eventReshape(int x, int y, int width, int height) {
         if (nativeWindow == 0)
             return;
+        HaikuGraphicsConfig gc = gc();
+        x = gc.scaleDown(x);
+        y = gc.scaleDown(y);
+        width = gc.scaleDown(width);
+        height = gc.scaleDown(height);
         location.x = x;
         location.y = y;
 
@@ -537,6 +551,11 @@ public class HaikuPlatformWindow implements PlatformWindow {
 
     public void eventMouse(int id, long when, int modifiers, int x, int y,
             int screenX, int screenY, int clicks, int button) {
+        HaikuGraphicsConfig gc = gc();
+        x = gc.scaleDown(x);
+        y = gc.scaleDown(y);
+        screenX = gc.scaleDown(screenX);
+        screenY = gc.scaleDown(screenY);
         // Popup = press button 2 or ctrl press button 1
         boolean popup = id == MouseEvent.MOUSE_PRESSED
             && (button == MouseEvent.BUTTON3 ||
@@ -549,12 +568,17 @@ public class HaikuPlatformWindow implements PlatformWindow {
 
     public void eventWheel(long when, int modifiers, int x, int y, int scrollType,
             int scrollAmount, int wheelRotation, double preciseWheelRotation) {
+        HaikuGraphicsConfig gc = gc();
+        x = gc.scaleDown(x);
+        y = gc.scaleDown(y);
         peer.notifyMouseWheelEvent(when, x, y, modifiers, scrollType,
             scrollAmount, wheelRotation, preciseWheelRotation, null);
     }
 
     public void updateInsets(int left, int top, int right, int bottom) {
-        insets.set(top, left, bottom, right);
+        HaikuGraphicsConfig gc = gc();
+        insets.set(gc.scaleDown(top), gc.scaleDown(left),
+                   gc.scaleDown(bottom), gc.scaleDown(right));
         peer.updateInsets(insets);
     }
 

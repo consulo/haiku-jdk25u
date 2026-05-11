@@ -30,6 +30,7 @@ import java.awt.geom.*;
 import java.awt.image.*;
 import sun.awt.image.*;
 import sun.java2d.SurfaceData;
+import sun.java2d.pipe.Region;
 import sun.lwawt.*;
 
 public class HaikuGraphicsConfig extends GraphicsConfiguration
@@ -51,9 +52,25 @@ public class HaikuGraphicsConfig extends GraphicsConfiguration
 
     @Override
     public Rectangle getBounds() {
-    	Rectangle bounds = new Rectangle();
+        Rectangle bounds = new Rectangle();
         nativeGetBounds(device.getDisplayID(), bounds);
+        bounds.x = scaleDown(bounds.x);
+        bounds.y = scaleDown(bounds.y);
+        bounds.width = scaleDown(bounds.width);
+        bounds.height = scaleDown(bounds.height);
         return bounds;
+    }
+
+    public int getScale() {
+        return device.getScaleFactor();
+    }
+
+    public int scaleUp(int v) {
+        return Region.clipRound(v * (double) getScale());
+    }
+
+    public int scaleDown(int v) {
+        return Region.clipRound(v / (double) getScale());
     }
 
     @Override
