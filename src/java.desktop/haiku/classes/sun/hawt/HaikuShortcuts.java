@@ -32,6 +32,12 @@ import java.util.Locale;
 /**
  * Resolves the keyboard modifiers the Haiku LWAWT toolkit uses for menu-item
  * accelerators and Swing mnemonic activation.
+
+ *
+ * <p>The deprecated {@link InputEvent#ALT_MASK}-family constants are used
+ * intentionally: {@link sun.awt.SunToolkit#getFocusAcceleratorKeyMask()}
+ * and {@link java.awt.Toolkit#getMenuShortcutKeyMask()} both still return
+ * those legacy masks, so we have to expose matching values.
  *
  * <p>Two system properties control the policy:
  *
@@ -66,6 +72,7 @@ import java.util.Locale;
  * visual mnemonic-flash and menu-bar entry follow the configured key
  * instead of the historical {@code VK_ALT}.
  */
+@SuppressWarnings("deprecation")
 final class HaikuShortcuts {
 
     /**
@@ -81,12 +88,10 @@ final class HaikuShortcuts {
         SHIFT(InputEvent.SHIFT_MASK, InputEvent.SHIFT_DOWN_MASK, KeyEvent.VK_SHIFT),
         META (InputEvent.META_MASK,  InputEvent.META_DOWN_MASK,  KeyEvent.VK_META);
 
-        @SuppressWarnings("deprecation")
         final int mask;
         final int maskEx;
         final int keyCode;
 
-        @SuppressWarnings("deprecation")
         Modifier(int mask, int maskEx, int keyCode) {
             this.mask = mask;
             this.maskEx = maskEx;
