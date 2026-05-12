@@ -25,8 +25,11 @@
 
 #include "Drawable.h"
 
+#include <stdint.h>
+
 #include <Bitmap.h>
 #include <GraphicsDefs.h>
+#include <InterfaceDefs.h>
 #include <Rect.h>
 #include <Size.h>
 #include <View.h>
@@ -69,6 +72,23 @@ Drawable::Allocate(int width, int height)
 	if (!newSurface->IsValid()) {
 		delete newSurface;
 		return false;
+	}
+
+	// Pre-fill the new bitmap with the system panel-background color so any
+	// region not yet drawn by Java (the strip beyond the old bitmap on a
+	// grow, or the whole surface before the first paint reaches us) blits
+	// as a neutral gray instead of uninitialized memory or jarring black.
+	// B_RGBA32 byte order on little-endian is B,G,R,A; pack accordingly.
+	{
+		rgb_color panel = ui_color(B_PANEL_BACKGROUND_COLOR);
+		uint32_t pixel = (uint32_t(panel.alpha != 0 ? panel.alpha : 0xff) << 24)
+			| (uint32_t(panel.red)   << 16)
+			| (uint32_t(panel.green) <<  8)
+			|  uint32_t(panel.blue);
+		uint32_t* row = (uint32_t*)newSurface->Bits();
+		size_t count = newSurface->BitsLength() / sizeof(uint32_t);
+		for (size_t i = 0; i < count; i++)
+			row[i] = pixel;
 	}
 
 	if (fSurface != NULL) {
