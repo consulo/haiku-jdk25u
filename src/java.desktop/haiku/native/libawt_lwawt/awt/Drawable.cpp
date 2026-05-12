@@ -79,8 +79,11 @@ Drawable::Allocate(int width, int height)
 		int oldHeight = bounds.IntegerHeight() + 1;
 		int blitHeight = height > oldHeight ? oldHeight : height;
 
-		newSurface->ImportBits(fSurface, BPoint(0, 0), BPoint(0, 0), 
-			BSize(blitWidth, blitHeight));
+		// BSize follows BRect's inclusive convention: BSize(w, h) means
+		// (w+1) x (h+1) pixels. Pass dimensions minus one or ImportBits
+		// will memcpy past the end of the source bitmap.
+		newSurface->ImportBits(fSurface, BPoint(0, 0), BPoint(0, 0),
+			BSize(blitWidth - 1, blitHeight - 1));
 
 		delete fSurface;
 	}
