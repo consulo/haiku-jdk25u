@@ -134,7 +134,16 @@ public class HaikuPlatformWindow implements PlatformWindow {
 
         setInitialFlags();
         nativeWindow = nativeInit(windowLook, windowFeel, windowFlags);
+        // nativeGetInsets writes raw device-pixel values; the rest of the
+        // Java side treats `insets` as logical, so scale down here. The
+        // updateInsets(...) callback does the same conversion for the
+        // dynamic path; keep the two in sync.
         nativeGetInsets(nativeWindow, insets);
+        HaikuGraphicsConfig gc = gc();
+        insets.set(gc.scaleDown(insets.top),
+                   gc.scaleDown(insets.left),
+                   gc.scaleDown(insets.bottom),
+                   gc.scaleDown(insets.right));
     }
 
     private void setInitialFlags() {
