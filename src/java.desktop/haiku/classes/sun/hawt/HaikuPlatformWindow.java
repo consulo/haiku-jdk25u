@@ -148,7 +148,11 @@ public class HaikuPlatformWindow implements PlatformWindow {
 
     private void setInitialFlags() {
         windowFeel = B_NORMAL_WINDOW_FEEL;
-        windowLook = B_DOCUMENT_WINDOW_LOOK;
+        // Use the plain titled look for top-level Java windows. AWT has no
+        // concept of a "resize grip", and the bottom-right knob that comes
+        // with B_DOCUMENT_WINDOW_LOOK looks foreign to cross-platform apps.
+        // The titled look is still resizable from any edge/corner.
+        windowLook = B_TITLED_WINDOW_LOOK;
         windowFlags = 0;
 
         final boolean isFrame = (target instanceof Frame);
