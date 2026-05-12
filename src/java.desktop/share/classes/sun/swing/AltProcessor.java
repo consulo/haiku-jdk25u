@@ -38,13 +38,42 @@ public final class AltProcessor implements KeyEventPostProcessor {
 
     private static final AltProcessor altProcessor = new AltProcessor();
 
+    /**
+     * The keycode whose press/release toggles the mnemonic-hidden state.
+     * Defaults to {@link KeyEvent#VK_ALT}, matching the historical
+     * "AltProcessor" name and the behaviour every other platform expects.
+     * Platforms whose native menu-shortcut modifier collides with Alt
+     * (notably Haiku, where Command = physical Alt) can install a
+     * different keycode here so the mnemonic-underline flash and
+     * menu-bar entry follow the platform-specific mnemonic key instead.
+     */
+    private static volatile int mnemonicKeyCode = KeyEvent.VK_ALT;
+
     public static KeyEventPostProcessor getInstance() {
         return altProcessor;
     }
 
+    /**
+     * Returns the keycode whose press/release toggles the mnemonic-hidden
+     * state. See {@link #setMnemonicKeyCode(int)}.
+     */
+    public static int getMnemonicKeyCode() {
+        return mnemonicKeyCode;
+    }
+
+    /**
+     * Override the keycode whose press/release toggles the mnemonic-hidden
+     * state. Pass {@link KeyEvent#VK_ALT} (the default) to restore the
+     * standard Swing behaviour. Intended to be called once during toolkit
+     * initialization.
+     */
+    public static void setMnemonicKeyCode(int keyCode) {
+        mnemonicKeyCode = keyCode;
+    }
+
     @Override
     public boolean postProcessKeyEvent(final KeyEvent ev) {
-        if (ev.getKeyCode() != KeyEvent.VK_ALT) {
+        if (ev.getKeyCode() != mnemonicKeyCode) {
             return false;
         }
 

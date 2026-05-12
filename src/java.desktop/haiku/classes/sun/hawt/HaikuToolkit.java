@@ -52,6 +52,11 @@ public class HaikuToolkit extends LWToolkit {
 
     static {
         System.loadLibrary("awt");
+        // Resolve menu/mnemonic modifiers from system properties and push
+        // the chosen mnemonic keycode into sun.swing.AltProcessor so the
+        // underline flash follows the same key as mnemonic activation.
+        // See HaikuShortcuts for the property reference and defaults.
+        HaikuShortcuts.installAltProcessorOverride();
     }
 
     public HaikuToolkit() {
@@ -262,7 +267,22 @@ public class HaikuToolkit extends LWToolkit {
     @Override
     @SuppressWarnings("deprecation")
     public int getMenuShortcutKeyMask() {
-        return Event.ALT_MASK;
+        return HaikuShortcuts.MENU_MODIFIER.mask;
+    }
+
+    @Override
+    public int getMenuShortcutKeyMaskEx() {
+        return HaikuShortcuts.MENU_MODIFIER.maskEx;
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public int getFocusAcceleratorKeyMask() {
+        // Mnemonic-activation modifier — what Swing puts into the KeyStroke
+        // when wiring up JButton/JMenuItem mnemonics. Kept distinct from
+        // getMenuShortcutKeyMask() so accelerators and mnemonics don't
+        // collide on the same KeyStroke.
+        return HaikuShortcuts.MNEMONIC_MODIFIER.mask;
     }
 
     @Override
