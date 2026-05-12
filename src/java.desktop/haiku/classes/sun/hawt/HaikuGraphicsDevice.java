@@ -55,6 +55,12 @@ public class HaikuGraphicsDevice extends GraphicsDevice {
     private void initScaleFactor() {
         if (SunGraphicsEnvironment.isUIScaleEnabled()) {
             double debugScale = SunGraphicsEnvironment.getDebugScale();
+            // debugScale >= 1 means -Dsun.java2d.uiScale=N was set; honour
+            // it verbatim. Otherwise fall back to the native heuristic in
+            // HaikuGraphicsDevice.cpp, which picks the largest of the
+            // system fonts (plain/bold/fixed) divided by the 12pt
+            // baseline. Math.round means a ratio of 1.5 is the threshold
+            // to bump from 1x to 2x.
             scale = (int) (debugScale >= 1
                     ? Math.round(debugScale)
                     : Math.round(nativeGetScaleFactor(displayID)));

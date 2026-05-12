@@ -47,10 +47,22 @@ JNIEXPORT jdouble JNICALL
 Java_sun_hawt_HaikuGraphicsDevice_nativeGetScaleFactor(JNIEnv *env,
     jclass clazz, jint displayID)
 {
-    if (be_plain_font == NULL) {
-        return 1.0;
-    }
-    float scale = be_plain_font->Size() / 12.0f;
+    // Haiku has no single "UI scale" setting. Per the recommended
+    // heuristic, derive it from the system-font sizes relative to the
+    // 12pt baseline. Many HiDPI Haiku setups leave be_plain_font at 12
+    // but enlarge be_bold_font / be_fixed_font (the decorator's tab
+    // height tracks the bold font), so take the max across all three
+    // system fonts to catch those configurations.
+    float baseline = 12.0f;
+    float biggest = baseline;
+    if (be_plain_font != NULL && be_plain_font->Size() > biggest)
+        biggest = be_plain_font->Size();
+    if (be_bold_font != NULL && be_bold_font->Size() > biggest)
+        biggest = be_bold_font->Size();
+    if (be_fixed_font != NULL && be_fixed_font->Size() > biggest)
+        biggest = be_fixed_font->Size();
+
+    float scale = biggest / baseline;
     if (scale < 1.0f) scale = 1.0f;
     return (jdouble) scale;
 }
