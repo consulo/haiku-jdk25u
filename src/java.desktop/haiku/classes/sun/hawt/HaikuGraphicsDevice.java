@@ -36,38 +36,58 @@ public class HaikuGraphicsDevice extends GraphicsDevice {
 
     private final int displayID;
     private final HaikuGraphicsConfig config;
+    // Resolved lazily on the first getScaleFactor() call so the native
+    // be_*_font globals have a chance to be populated by app_server
+    // (HaikuToolkit.nativeInit creates the BApplication that does that).
+    // 0 means "not yet resolved".
     private volatile int scale;
+
+    /** Haiku's font-size baseline that corresponds to a 1x UI scale. */
+    private static final double FONT_BASELINE = 12.0;
 
     private native double nativeGetScreenResolution(int displayID,
         double[] resolution);
-    private static native double nativeGetScaleFactor(int displayID);
+    /**
+     * Fills {@code sizes} with the current sizes of plain, bold and fixed
+     * system fonts respectively. {@code sizes.length} must be 3. A 0.0
+     * entry means the corresponding native global was unavailable.
+     */
+    private static native void nativeGetSystemFontSizes(double[] sizes);
 
     public HaikuGraphicsDevice(int displayID) {
         this.displayID = displayID;
         config = new HaikuGraphicsConfig(this);
-        initScaleFactor();
     }
 
     public int getScaleFactor() {
-        return scale;
+        int s = scale;
+        if (s == 0) {
+            s = resolveScale();
+            scale = s;
+        }
+        return s;
     }
 
-    private void initScaleFactor() {
-        if (SunGraphicsEnvironment.isUIScaleEnabled()) {
-            double debugScale = SunGraphicsEnvironment.getDebugScale();
-            // debugScale >= 1 means -Dsun.java2d.uiScale=N was set; honour
-            // it verbatim. Otherwise fall back to the native heuristic in
-            // HaikuGraphicsDevice.cpp, which picks the largest of the
-            // system fonts (plain/bold/fixed) divided by the 12pt
-            // baseline. Math.round means a ratio of 1.5 is the threshold
-            // to bump from 1x to 2x.
-            scale = (int) (debugScale >= 1
-                    ? Math.round(debugScale)
-                    : Math.round(nativeGetScaleFactor(displayID)));
-            if (scale < 1) scale = 1;
-        } else {
-            scale = 1;
+    private int resolveScale() {
+        if (!SunGraphicsEnvironment.isUIScaleEnabled()) {
+            return 1;
         }
+        double debugScale = SunGraphicsEnvironment.getDebugScale();
+        if (debugScale >= 1) {
+            return Math.max(1, (int) Math.round(debugScale));
+        }
+
+        // Heuristic: take the largest of the system fonts (Plain / Bold /
+        // Fixed) and divide by the 12pt baseline. HiDPI Haiku setups bump
+        // the bold/decorator font even when Plain stays at 12, so the max
+        // gives the most reliable signal.
+        double[] sizes = new double[3];
+        nativeGetSystemFontSizes(sizes);
+        double biggest = FONT_BASELINE;
+        for (double size : sizes) {
+            if (size > biggest) biggest = size;
+        }
+        return Math.max(1, (int) Math.round(biggest / FONT_BASELINE));
     }
 
     @Override

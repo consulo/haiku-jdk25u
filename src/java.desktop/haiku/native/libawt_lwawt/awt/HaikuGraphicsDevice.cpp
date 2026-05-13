@@ -36,55 +36,23 @@ extern "C" {
 
 /*
  * Class:     sun_hawt_HaikuGraphicsDevice
- * Method:    nativeGetScaleFactor
- * Signature: (I)D
+ * Method:    nativeGetSystemFontSizes
  *
- * Haiku has no direct screen-scale API. Per the Haiku-recommended
- * heuristic (https://discuss.haiku-os.org/t/getting-the-screen-dpi/13121/5),
- * derive scale from the user's plain-font size relative to the 12pt baseline.
+ * Fills the passed double[3] with the current sizes of be_plain_font,
+ * be_bold_font, be_fixed_font (in that order). A 0.0 entry means the
+ * corresponding global was NULL. Scale-factor policy lives on the Java
+ * side; this method is just the data query.
  */
-JNIEXPORT jdouble JNICALL
-Java_sun_hawt_HaikuGraphicsDevice_nativeGetScaleFactor(JNIEnv *env,
-    jclass clazz, jint displayID)
+JNIEXPORT void JNICALL
+Java_sun_hawt_HaikuGraphicsDevice_nativeGetSystemFontSizes(JNIEnv *env,
+    jclass clazz, jdoubleArray result)
 {
-    // Haiku has no single "UI scale" setting. Per the community-blessed
-    // heuristic (see haiku-development mailing list "HiDPI strategies,
-    // current and future", 2021-08-30), derive scale from the
-    // system-font size relative to the 12pt baseline.
-    //
-    // Take the largest of plain / bold / fixed: HiDPI Haiku setups
-    // generally bump all three together, but if a user only enlarges
-    // the bold/decorator font we still want to scale to match.
-    //
-    // NOTE: these globals only reflect the user's current Appearance
-    // preferences AFTER a Haiku reboot — beta4 release notes explicitly
-    // state "it is not possible for changes to these settings to take
-    // effect without a reboot."
-    //
-    // TODO: when waddlesplash's proposed BFont::PixelDensity() or
-    // BScreen::DefaultFont() ever lands, switch to that API for proper
-    // per-display scaling on multi-monitor setups. Today displayID is
-    // ignored because all displays share the system font.
-    const float baseline = 12.0f;
-    float plainSize = (be_plain_font != NULL) ? be_plain_font->Size() : 0.0f;
-    float boldSize  = (be_bold_font  != NULL) ? be_bold_font->Size()  : 0.0f;
-    float fixedSize = (be_fixed_font != NULL) ? be_fixed_font->Size() : 0.0f;
-
-    float biggest = baseline;
-    if (plainSize > biggest) biggest = plainSize;
-    if (boldSize  > biggest) biggest = boldSize;
-    if (fixedSize > biggest) biggest = fixedSize;
-
-    float scale = biggest / baseline;
-    if (scale < 1.0f) scale = 1.0f;
-
-    fprintf(stderr,
-        "[hawt] nativeGetScaleFactor: display=%d plain=%.1f bold=%.1f "
-        "fixed=%.1f baseline=%.1f -> biggest=%.1f ratio=%.3f scale=%.3f\n",
-        (int) displayID, plainSize, boldSize, fixedSize, baseline,
-        biggest, biggest / baseline, scale);
-
-    return (jdouble) scale;
+    jdouble sizes[3] = {
+        be_plain_font != NULL ? be_plain_font->Size() : 0.0,
+        be_bold_font  != NULL ? be_bold_font->Size()  : 0.0,
+        be_fixed_font != NULL ? be_fixed_font->Size() : 0.0,
+    };
+    env->SetDoubleArrayRegion(result, 0, 3, sizes);
 }
 
 /*
