@@ -28,7 +28,6 @@
 #include <Screen.h>
 #include <Font.h>
 #include <InterfaceDefs.h>
-#include <Menu.h>
 #include <algorithm>
 
 #include "Utilities.h"
@@ -48,29 +47,30 @@ JNIEXPORT jdouble JNICALL
 Java_sun_hawt_HaikuGraphicsDevice_nativeGetScaleFactor(JNIEnv *env,
     jclass clazz, jint displayID)
 {
-    // Haiku has no single "UI scale" setting. Per the recommended
-    // heuristic, derive it from the system-font size relative to the
-    // 12pt baseline.
+    // Haiku has no single "UI scale" setting. Per the community-blessed
+    // heuristic (see haiku-development mailing list "HiDPI strategies,
+    // current and future", 2021-08-30), derive scale from the
+    // system-font size relative to the 12pt baseline.
     //
-    // The globals be_plain_font / be_bold_font / be_fixed_font are
-    // unreliable here — their values come from the BApplication
-    // initialization snapshot and can lag behind the user's Appearance
-    // preferences. get_menu_info() reads the menu-font size directly
-    // from the app_server's current settings, which tracks the Plain
-    // font in default Haiku Appearance behaviour. Use it as the
-    // primary signal and keep the be_*_font values as a fallback when
-    // someone has detached the menu font.
+    // Take the largest of plain / bold / fixed: HiDPI Haiku setups
+    // generally bump all three together, but if a user only enlarges
+    // the bold/decorator font we still want to scale to match.
+    //
+    // NOTE: these globals only reflect the user's current Appearance
+    // preferences AFTER a Haiku reboot — beta4 release notes explicitly
+    // state "it is not possible for changes to these settings to take
+    // effect without a reboot."
+    //
+    // TODO: when waddlesplash's proposed BFont::PixelDensity() or
+    // BScreen::DefaultFont() ever lands, switch to that API for proper
+    // per-display scaling on multi-monitor setups. Today displayID is
+    // ignored because all displays share the system font.
     const float baseline = 12.0f;
-
-    menu_info mi;
-    get_menu_info(&mi);
-    float menuSize  = mi.font_size;
     float plainSize = (be_plain_font != NULL) ? be_plain_font->Size() : 0.0f;
     float boldSize  = (be_bold_font  != NULL) ? be_bold_font->Size()  : 0.0f;
     float fixedSize = (be_fixed_font != NULL) ? be_fixed_font->Size() : 0.0f;
 
     float biggest = baseline;
-    if (menuSize  > biggest) biggest = menuSize;
     if (plainSize > biggest) biggest = plainSize;
     if (boldSize  > biggest) biggest = boldSize;
     if (fixedSize > biggest) biggest = fixedSize;
@@ -79,10 +79,9 @@ Java_sun_hawt_HaikuGraphicsDevice_nativeGetScaleFactor(JNIEnv *env,
     if (scale < 1.0f) scale = 1.0f;
 
     fprintf(stderr,
-        "[hawt] nativeGetScaleFactor: display=%d menu=%.1f plain=%.1f "
-        "bold=%.1f fixed=%.1f baseline=%.1f -> biggest=%.1f ratio=%.3f "
-        "scale=%.3f\n",
-        (int) displayID, menuSize, plainSize, boldSize, fixedSize, baseline,
+        "[hawt] nativeGetScaleFactor: display=%d plain=%.1f bold=%.1f "
+        "fixed=%.1f baseline=%.1f -> biggest=%.1f ratio=%.3f scale=%.3f\n",
+        (int) displayID, plainSize, boldSize, fixedSize, baseline,
         biggest, biggest / baseline, scale);
 
     return (jdouble) scale;
