@@ -53,17 +53,25 @@ Java_sun_hawt_HaikuGraphicsDevice_nativeGetScaleFactor(JNIEnv *env,
     // but enlarge be_bold_font / be_fixed_font (the decorator's tab
     // height tracks the bold font), so take the max across all three
     // system fonts to catch those configurations.
-    float baseline = 12.0f;
+    const float baseline = 12.0f;
+    float plainSize = (be_plain_font != NULL) ? be_plain_font->Size() : 0.0f;
+    float boldSize  = (be_bold_font  != NULL) ? be_bold_font->Size()  : 0.0f;
+    float fixedSize = (be_fixed_font != NULL) ? be_fixed_font->Size() : 0.0f;
+
     float biggest = baseline;
-    if (be_plain_font != NULL && be_plain_font->Size() > biggest)
-        biggest = be_plain_font->Size();
-    if (be_bold_font != NULL && be_bold_font->Size() > biggest)
-        biggest = be_bold_font->Size();
-    if (be_fixed_font != NULL && be_fixed_font->Size() > biggest)
-        biggest = be_fixed_font->Size();
+    if (plainSize > biggest) biggest = plainSize;
+    if (boldSize  > biggest) biggest = boldSize;
+    if (fixedSize > biggest) biggest = fixedSize;
 
     float scale = biggest / baseline;
     if (scale < 1.0f) scale = 1.0f;
+
+    fprintf(stderr,
+        "[hawt] nativeGetScaleFactor: display=%d plain=%.1f bold=%.1f "
+        "fixed=%.1f baseline=%.1f -> biggest=%.1f ratio=%.3f scale=%.3f\n",
+        (int) displayID, plainSize, boldSize, fixedSize, baseline,
+        biggest, biggest / baseline, scale);
+
     return (jdouble) scale;
 }
 
