@@ -61,16 +61,16 @@ public class HaikuGraphicsConfig extends GraphicsConfiguration
         return bounds;
     }
 
-    public int getScale() {
+    public double getScale() {
         return device.getScaleFactor();
     }
 
     public int scaleUp(int v) {
-        return Region.clipRound(v * (double) getScale());
+        return Region.clipRound(v * getScale());
     }
 
     public int scaleDown(int v) {
-        return Region.clipRound(v / (double) getScale());
+        return Region.clipRound(v / getScale());
     }
 
     @Override

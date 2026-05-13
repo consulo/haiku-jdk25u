@@ -39,8 +39,9 @@ public class HaikuGraphicsDevice extends GraphicsDevice {
     // Resolved lazily on the first getScaleFactor() call so the native
     // be_*_font globals have a chance to be populated by app_server
     // (HaikuToolkit.nativeInit creates the BApplication that does that).
-    // 0 means "not yet resolved".
-    private volatile int scale;
+    // 0.0 means "not yet resolved". Fractional values are supported
+    // (1.5, 2.25, ...) — matches Windows Win32GraphicsDevice.
+    private volatile double scale;
 
     /** Haiku's font-size baseline that corresponds to a 1x UI scale. */
     private static final double FONT_BASELINE = 12.0;
@@ -59,35 +60,36 @@ public class HaikuGraphicsDevice extends GraphicsDevice {
         config = new HaikuGraphicsConfig(this);
     }
 
-    public int getScaleFactor() {
-        int s = scale;
-        if (s == 0) {
+    public double getScaleFactor() {
+        double s = scale;
+        if (s == 0.0) {
             s = resolveScale();
             scale = s;
         }
         return s;
     }
 
-    private int resolveScale() {
+    private double resolveScale() {
         if (!SunGraphicsEnvironment.isUIScaleEnabled()) {
-            return 1;
+            return 1.0;
         }
         double debugScale = SunGraphicsEnvironment.getDebugScale();
         if (debugScale >= 1) {
-            return Math.max(1, (int) Math.round(debugScale));
+            return debugScale;
         }
 
         // Heuristic: take the largest of the system fonts (Plain / Bold /
         // Fixed) and divide by the 12pt baseline. HiDPI Haiku setups bump
         // the bold/decorator font even when Plain stays at 12, so the max
-        // gives the most reliable signal.
+        // gives the most reliable signal. Fractional results (Plain=18 ->
+        // 1.5) flow through to the rest of the pipeline unrounded.
         double[] sizes = new double[3];
         nativeGetSystemFontSizes(sizes);
         double biggest = FONT_BASELINE;
         for (double size : sizes) {
             if (size > biggest) biggest = size;
         }
-        return Math.max(1, (int) Math.round(biggest / FONT_BASELINE));
+        return biggest / FONT_BASELINE;
     }
 
     @Override
