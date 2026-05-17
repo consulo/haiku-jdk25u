@@ -33,6 +33,12 @@
 #if __APPLE__
 #include <sys/param.h>
 #include <sys/mount.h>
+#elif defined(__HAIKU__)
+// Haiku has POSIX statvfs() but not the Linux statfs() variant. The
+// fields used below (f_blocks, f_bsize, f_bfree, f_bavail) are present
+// on both, so alias the function and struct name with a single macro.
+#include <sys/statvfs.h>
+#define statfs statvfs
 #else
 #include <sys/statfs.h>
 #endif
