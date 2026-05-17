@@ -23,8 +23,12 @@
 
 #include <stdio.h>
 #include <jni.h>
-#include <signal.h>
+#include <signal.h>                                           
+#ifdef __HAIKU__
+#include <ucontext.h>
+#else
 #include <sys/ucontext.h>
+#endif
 #include <errno.h>
 #include <string.h>
 
